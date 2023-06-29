@@ -1,15 +1,18 @@
 import React, {useState} from 'react';
-import {View,Text} from 'react-native';
+import {View,Text,Image,Pressable} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
-
+import StarRating from 'react-native-star-rating';
 import styles from './AddBook.style';
 import CustomInput from '../../components/CustomInput/CustomInput';
+
+
 
 import { Formik } from 'formik';
 import { ScrollView } from 'react-native-gesture-handler';
 import PickImageModal from '../../components/PickImageModal/PickImageModal';
 import CustomButton from '../../components/CustomButton/CustomButton';
-import colors from '../../utils/colors';
+import colors from '../../utils/colors'; 
+import Seperator from '../../components/Seperator/Seperator';
 
 const bookCategoryList = [
     "Fantasy",
@@ -57,7 +60,7 @@ const AddBook = () => {
 
 
     return (
-      <View>
+      <View style={styles.container}>
         <Formik
           initialValues={{
             bookName: '',
@@ -66,20 +69,28 @@ const AddBook = () => {
             rating: 0,
           }}
           onSubmit={values => console.log(values)}>
-          {({handleChange, handleBlur, handleSubmit, values}) => (
+          {({handleChange, handleSubmit, values, setFieldValue}) => (
             <ScrollView>
+              {imageURI && (
+                <View style={styles.imageContainer}>
+                  <Pressable onPress={() => setModalVisible(!modalVisible)}>
+                    <Image source={{uri: imageURI}} style={styles.image} />
+                  </Pressable>
+                </View>
+              )}
               <CustomInput
                 label={'Book Name'}
                 onChangeText={handleChange('bookName')}
                 additionalStyles={styles.input}
                 value={values.bookName}
               />
+              <Seperator />
               <View style={styles.picker.container}>
-                <Text style={styles.picker.label}>Book Category</Text>
+                <Text style={styles.label}>Book Category</Text>
                 <Picker
                   selectedValue={values.bookCategory}
                   style={styles.picker.inner}
-                  mode='dropdown'
+                  mode="dropdown"
                   onValueChange={handleChange('bookCategory')}>
                   {bookCategoryList.map(category => (
                     <Picker.Item
@@ -90,27 +101,55 @@ const AddBook = () => {
                   ))}
                 </Picker>
               </View>
+              <Seperator />
               <CustomInput
-                label={'Book Cooment'}
+                label={'Book Comment'}
                 onChangeText={handleChange('bookComment')}
                 additionalStyles={styles.input}
                 multiline={true}
                 minHeight={120}
                 value={values.bookComment}
               />
-
+              <Seperator />
+              
+              {!imageURI && (
+                <>
+                  <CustomButton
+                    additionalStyles={{
+                      container: {
+                        backgroundColor: colors.secondary,
+                      },
+                    }}
+                    label={'Pick Image'}
+                    onPress={() => setModalVisible(!modalVisible)}
+                  />
+                  <Seperator />
+                </>
+              )}
+              <Seperator />
+              <View style={styles.rating.container}>
+                <Text style={styles.rating.label}>Rating</Text>
+                <StarRating
+                  disabled={false}
+                  maxStars={5}
+                  rating={values.rating}
+                  selectedStar={(rating, _) => setFieldValue('rating', rating)}
+                  fullStarColor={colors.star}
+                  halfStarEnabled={true}
+                  starSize={32}
+                />
+              </View>
+              <Seperator />
               <CustomButton
-                additionalStyles={{container: {marginVertical:12,marginHorizontal: 8, backgroundColor: colors.secondary}}}
-                label={"Pick Image"}
-                onPress={() => setModalVisible(!modalVisible)}
-              />      
-
-
-
-
-
-
-              <PickImageModal imageURI={imageURI} setImageURI={setImageURI} modalVisible={modalVisible} setModalVisible={setModalVisible}/>
+                    additionalStyles={{
+                      container: {
+                        backgroundColor: colors.success,
+                        marginTop: 24,
+                      },
+                    }}
+                    label={'Send Post'}
+                    onPress={() => setModalVisible(!modalVisible)}
+              />
             </ScrollView>
           )}
         </Formik>

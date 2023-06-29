@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import colors from '../../utils/colors';
 export default StyleSheet.create({
     inner: {
         backgroundColor: 'white',
@@ -8,10 +9,12 @@ export default StyleSheet.create({
         alignItems:'center',
     },
     input: {
-        flex:1
+        flex:1,
+        textAlignVertical: 'top',
     },
     label: {
         marginBottom: 4,
+        color: colors.black,
     },
     iconContainer: {
         paddingHorizontal: 4,

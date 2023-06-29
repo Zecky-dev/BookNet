@@ -10,5 +10,6 @@ const colors = {
     success: '#4CAF50',
     primary: "#795548",
     secondary: '#6e7b76',
+    star: "#ffd700",
 };
 export default colors;
