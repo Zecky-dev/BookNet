@@ -15,7 +15,6 @@ const PickImageModal = ({modalVisible,setModalVisible,imageURI,setImageURI}) => 
   const takePicture = async () => {
     const result = await launchCamera({
       mediaType: 'photo',
-      cameraType: 'front',
       quality:1 ,
     });
     if(!result.didCancel && !result.errorCode) {

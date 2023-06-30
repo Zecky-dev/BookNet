@@ -13,12 +13,24 @@ import PickImageModal from '../../components/PickImageModal/PickImageModal';
 import CustomButton from '../../components/CustomButton/CustomButton';
 import colors from '../../utils/colors'; 
 import Seperator from '../../components/Seperator/Seperator';
+import { postValidationSchema } from '../../utils/validations';
+import LoadingModal from '../../components/LoadingModal/LoadingModal';
+
+import auth from '@react-native-firebase/auth';
+import storage from '@react-native-firebase/storage';
+import firestore from '@react-native-firebase/firestore';
+
+import 'react-native-get-random-values';
+import {v4 as uuidv4} from 'uuid';
+import { showMessage } from 'react-native-flash-message';
+import { getFirestoreErrorMessage, getStorageTaskErrorMessage } from '../../utils/firebaseErrors';
+
 
 const bookCategoryList = [
     "Fantasy",
     "Science Fiction",
     "Dystopian",
-    "Action & Advanture",
+    "Action & Adventure",
     "Mystery",
     "Horror",
     "Thriller & Suspense",
@@ -53,9 +65,96 @@ const bookCategoryList = [
 
 
 
-const AddBook = () => {
+const AddBook = ({navigation}) => {
     const [modalVisible,setModalVisible] = useState(false);
     const [imageURI,setImageURI] = useState(null);
+    const [loading,setLoading] = useState(false);
+    const [progress,setProgress] = useState(0);
+
+    const uploadPost = (values) => {
+      let imageURL = null;
+      let postId = uuidv4();
+      let uploadImagePromise = Promise.resolve();
+    
+      if (imageURI) {
+        // Resmi yükle ve imageURL ataması yap
+        setLoading(true);
+        const reference = storage().ref(`postImages/${postId}`);
+        const task = reference.putFile(imageURI);
+    
+        uploadImagePromise = new Promise((resolve, reject) => {
+          task.on('state_changed', taskSnapShot => {
+            const progressByPercent = (taskSnapShot.bytesTransferred / taskSnapShot.totalBytes) * 100;
+            setProgress(progressByPercent);
+          });
+    
+          task.then(async () => {
+            console.log("Post resmi yüklendi.");
+            imageURL = await task.snapshot.ref.getDownloadURL();
+            resolve();
+          });
+    
+          task.catch(error => {
+            showMessage({
+              message: getStorageTaskErrorMessage(error.code),
+              type: "danger",
+            });
+            reject(error);
+          });
+        });
+      }
+    
+      uploadImagePromise
+        .then(() => {
+          // Resim yüklendikten sonra belge olarak detayları firestore'a kaydet
+          return firestore()
+            .collection('Posts')
+            .doc(postId)
+            .set({
+              bookID: postId,
+              bookName: values.bookName,
+              bookCategory: values.bookCategory,
+              bookComment: values.bookComment,
+              bookRating: values.rating,
+              bookImageURL: imageURL,
+            });
+        })
+        .then(() => {
+          // Post oluşturulduktan sonra comments koleksiyonunu oluşturmak için
+          const commentsCollection = firestore()
+            .collection('Posts')
+            .doc(postId)
+            .collection('comments');
+    
+          // comments koleksiyonuna bir dummy döküman eklemek için
+          return commentsCollection.doc('dummy').set({});
+        })
+        .then(() => {
+          // Post oluşturulduktan sonra likes koleksiyonunu oluşturmak için
+          const likesCollection = firestore()
+            .collection('Posts')
+            .doc(postId)
+            .collection('likes');
+    
+          // likes koleksiyonuna bir dummy döküman eklemek için
+          return likesCollection.doc('dummy').set({});
+        })
+        .then(() => {
+          setProgress(0);
+          setLoading(false);
+          navigation.navigate('Social');
+        })
+        .catch(error => {
+          showMessage({
+            message: getFirestoreErrorMessage(error.code),
+            type: "danger",
+          });
+          setLoading(false);
+          setProgress(0);
+        });
+    }
+    
+
 
 
 
@@ -64,12 +163,18 @@ const AddBook = () => {
         <Formik
           initialValues={{
             bookName: '',
-            bookCategory: '',
+            bookCategory: 'default',
             bookComment: '',
             rating: 0,
           }}
-          onSubmit={values => console.log(values)}>
-          {({handleChange, handleSubmit, values, setFieldValue}) => (
+          onSubmit={(values,{resetForm}) => {
+            uploadPost(values);
+            resetForm();
+            setImageURI(null);
+          }}
+          validationSchema={postValidationSchema}  
+        >
+          {({handleChange, handleSubmit, values, setFieldValue, touched, errors}) => (
             <ScrollView>
               {imageURI && (
                 <View style={styles.imageContainer}>
@@ -84,6 +189,7 @@ const AddBook = () => {
                 additionalStyles={styles.input}
                 value={values.bookName}
               />
+              {touched.bookName && errors.bookName && (<Text style={{color:colors.error}}>{errors.bookName}</Text>)}
               <Seperator />
               <View style={styles.picker.container}>
                 <Text style={styles.label}>Book Category</Text>
@@ -92,6 +198,7 @@ const AddBook = () => {
                   style={styles.picker.inner}
                   mode="dropdown"
                   onValueChange={handleChange('bookCategory')}>
+                  <Picker.Item label="Please select a category" value={"default"}/>
                   {bookCategoryList.map(category => (
                     <Picker.Item
                       label={category}
@@ -110,8 +217,8 @@ const AddBook = () => {
                 minHeight={120}
                 value={values.bookComment}
               />
+              {touched.bookComment && errors.bookComment && (<Text style={{color:colors.error}}>{errors.bookComment}</Text>)}
               <Seperator />
-              
               {!imageURI && (
                 <>
                   <CustomButton
@@ -148,8 +255,10 @@ const AddBook = () => {
                       },
                     }}
                     label={'Send Post'}
-                    onPress={() => setModalVisible(!modalVisible)}
+                    onPress={handleSubmit}
               />
+              <PickImageModal imageURI={imageURI} setImageURI={setImageURI} modalVisible={modalVisible} setModalVisible={setModalVisible}/>
+              <LoadingModal loading={loading} progress={progress}/>
             </ScrollView>
           )}
         </Formik>

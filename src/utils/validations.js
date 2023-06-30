@@ -6,7 +6,7 @@ const ERRORS = {
     string: "You should pass only alphabetical characters to this area.",
     numeric: "You should pass only numerical characters to this area.",
     min: (type,min) => { type === "numeric" ? `You should pass minimum ${min} value to this area` : `Length of this area must be minimum ${min} characters length.`},
-    max: (max) => { type === "numeric" ? `You should pass maximum ${max} value to this area` : `Length of this area must be maximum ${max} characters length.`},
+    max: (type,max) => { type === "numeric" ? `You should pass maximum ${max} value to this area` : `Length of this area must be maximum ${max} characters length.`},
 }
 
 
@@ -25,5 +25,13 @@ const registerValidationSchema = yup.object().shape({
 })
 
 
+const postValidationSchema = yup.object().shape({
+    bookName: yup.string().typeError(ERRORS.string).min(3,(min) => ERRORS.min("text",min)).max(30,(max) => ERRORS.max("text",max)).required(ERRORS.required),
+    bookCategory: yup.string().notOneOf(['default'], 'Please select a category'),
+    bookComment: yup.string().typeError(ERRORS.string).min(12,(min) => ERRORS.min("text",min)).max(240,(max) => ERRORS.max("text",max)).required(ERRORS.required),
+    rating: yup.number().typeError(ERRORS.numeric).min(0.5,(min) => ERRORS.min("numeric",min)).max(5,(max) => ERRORS.max("numeric",max)).required(ERRORS.required),
+})
 
-export {loginValidationSchema,registerValidationSchema};
+
+
+export {loginValidationSchema,registerValidationSchema,postValidationSchema};

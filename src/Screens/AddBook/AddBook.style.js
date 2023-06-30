@@ -23,8 +23,8 @@ export default StyleSheet.create({
     },
   },
   image: {
-    width: 100,
-    height: 100,
+    width: 150,
+    height: 200,
   },
   imageContainer: {
     flexDirection: 'row',
