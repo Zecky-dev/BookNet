@@ -24,6 +24,8 @@ import Profile from './Screens/Profile/Profile';
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
+import { MenuProvider } from 'react-native-popup-menu';
+
 const headerStyles = {
   headerRight: {
     backgroundColor: 'white',
@@ -151,10 +153,12 @@ const Router = () => {
 
     return (
       <GestureHandlerRootView style={{flex: 1,}}>
-      <NavigationContainer>
-        {user ? <MainTabs /> : <AuthStack />}
-        <FlashMessage position={"top"}/>
-      </NavigationContainer>
+        <MenuProvider>
+          <NavigationContainer>
+            {user ? <MainTabs /> : <AuthStack />}
+            <FlashMessage position={"top"}/>
+          </NavigationContainer>
+        </MenuProvider> 
       </GestureHandlerRootView>
     );
 }

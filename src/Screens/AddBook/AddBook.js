@@ -25,9 +25,6 @@ import {v4 as uuidv4} from 'uuid';
 import { showMessage } from 'react-native-flash-message';
 import { getFirestoreErrorMessage, getStorageTaskErrorMessage } from '../../utils/firebaseErrors';
 
-import ImageResizer from 'react-native-image-resizer';
-
-
 const bookCategoryList = [
     "Fantasy",
     "Science Fiction",
@@ -120,6 +117,8 @@ const AddBook = ({navigation}) => {
               bookComment: values.bookComment,
               bookRating: values.rating,
               bookImageURL: imageURL,
+              postLikes: [],
+              postOwner: auth().currentUser.email,
             });
         })
         .then(() => {
@@ -131,16 +130,6 @@ const AddBook = ({navigation}) => {
     
           // comments koleksiyonuna bir dummy döküman eklemek için
           return commentsCollection.doc('dummy').set({});
-        })
-        .then(() => {
-          // Post oluşturulduktan sonra likes koleksiyonunu oluşturmak için
-          const likesCollection = firestore()
-            .collection('Posts')
-            .doc(postId)
-            .collection('likes');
-    
-          // likes koleksiyonuna bir dummy döküman eklemek için
-          return likesCollection.doc('dummy').set({});
         })
         .then(() => {
           setProgress(0);

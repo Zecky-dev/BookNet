@@ -77,4 +77,35 @@ export default StyleSheet.create({
     textAlign: 'center',
     marginTop: 8,
   },
+
+  postOwnerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+  },
+
+  postOwnerImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+
+  postOwnerNameSurname: {
+    color: colors.black,
+    fontWeight: 'bold',
+  },
+
+  followButtonContainer: {
+    backgroundColor: colors.login,
+    padding: 8,
+    borderRadius: 4,
+  },
+
+  followButtonLabel: {
+    color: 'white',
+  }
+
+
+
+
 });
