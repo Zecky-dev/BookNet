@@ -10,8 +10,39 @@ import Seperator from '../Seperator/Seperator';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { showMessage } from 'react-native-flash-message';
 
+import ImageResizer from 'react-native-image-resizer';
+
+
 const PickImageModal = ({modalVisible,setModalVisible,imageURI,setImageURI}) => {
   
+  const resizeAndSetImage = async (uri,width=1280,height=720) => {
+    let imageUri = uri;
+    let newHeight = height;
+    let newWidth = width;
+    let quality = 100;
+    let rotation = 0;
+    let compressFormat = 'PNG';
+    let outputPath = null;
+    
+    try {
+      let resizedImage = await ImageResizer.createResizedImage(
+        imageUri,
+        newWidth,
+        newHeight,
+        compressFormat,
+        quality,
+        rotation,
+        outputPath
+      )
+      setImageURI(resizedImage.uri);
+    }
+    catch(error) {
+      console.log("Error: " + error)
+    }
+  }
+
+
+
   const takePicture = async () => {
     const result = await launchCamera({
       mediaType: 'photo',
@@ -19,7 +50,7 @@ const PickImageModal = ({modalVisible,setModalVisible,imageURI,setImageURI}) => 
     });
     if(!result.didCancel && !result.errorCode) {
       setModalVisible(!modalVisible);
-      setImageURI(result.assets[0].uri);
+      resizeAndSetImage(result.assets[0].uri)
     }
     else if(result.didCancel) {
       setModalVisible(!modalVisible);
@@ -51,7 +82,8 @@ const PickImageModal = ({modalVisible,setModalVisible,imageURI,setImageURI}) => 
       quality: 1,
     });
     if(!result.didCancel && !result.errorCode) {
-      setImageURI(result.assets[0].uri);
+      resizeAndSetImage(result.assets[0].uri)
+      setModalVisible(!modalVisible);
     }
     else if(result.didCancel) {
       showMessage({

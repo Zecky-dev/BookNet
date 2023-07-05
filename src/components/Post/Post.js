@@ -6,10 +6,14 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import StarRating from 'react-native-star-rating';
 import colors from '../../utils/colors';
 
+import firestore from '@react-native-firebase/firestore';
+import auth from '@react-native-firebase/auth';
+
 const Post = ({details}) => {
 
     const {bookCategory,bookComment,bookID,bookImageURL,bookName,bookRating} = details;
 
+  
     return (
       <View style={styles.container}>
         
@@ -34,7 +38,7 @@ const Post = ({details}) => {
                 }
                 style={styles.image}
               />
-            </View>
+            </View> 
             <Text style={styles.bookTitle}>{bookName}</Text>
             <View style={styles.innerDetails}>
               <View style={styles.bookCategory}>

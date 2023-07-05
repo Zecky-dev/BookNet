@@ -27,7 +27,7 @@ const LoadingModal = ({loading,progress}) => {
             <View style={styles.container}>
                 <Lottie style={styles.animation} source={require('../../assets/animations/bookLoading.json')} autoPlay loop/>
                 <Text style={styles.progress}>
-                    %{progress}
+                    %{progress.toFixed(2)}
                 </Text>
             </View>
         </Modal>

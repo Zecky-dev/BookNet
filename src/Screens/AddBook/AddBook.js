@@ -25,6 +25,8 @@ import {v4 as uuidv4} from 'uuid';
 import { showMessage } from 'react-native-flash-message';
 import { getFirestoreErrorMessage, getStorageTaskErrorMessage } from '../../utils/firebaseErrors';
 
+import ImageResizer from 'react-native-image-resizer';
+
 
 const bookCategoryList = [
     "Fantasy",
@@ -71,7 +73,7 @@ const AddBook = ({navigation}) => {
     const [loading,setLoading] = useState(false);
     const [progress,setProgress] = useState(0);
 
-    const uploadPost = (values) => {
+    const uploadPost = async (values) => {
       let imageURL = null;
       let postId = uuidv4();
       let uploadImagePromise = Promise.resolve();
@@ -80,8 +82,9 @@ const AddBook = ({navigation}) => {
         // Resmi yükle ve imageURL ataması yap
         setLoading(true);
         const reference = storage().ref(`postImages/${postId}`);
+        // Resmi referansa yüklemeden önce boyutunu değiştir, yüklenme süresini kısalt
+        
         const task = reference.putFile(imageURI);
-    
         uploadImagePromise = new Promise((resolve, reject) => {
           task.on('state_changed', taskSnapShot => {
             const progressByPercent = (taskSnapShot.bytesTransferred / taskSnapShot.totalBytes) * 100;
